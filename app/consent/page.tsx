@@ -54,7 +54,7 @@ export default function ConsentPage() {
 
           <div className="border-t border-zinc-700 pt-4 space-y-1 text-xs text-zinc-400">
             <p className="font-medium text-zinc-300">Researcher</p>
-            <p>Snehasish Satpathy</p>
+            <p>Snehasish Satpathy, Indiana Wesleyan University</p>
             <p>
               Questions or concerns:{" "}
               <a
@@ -64,7 +64,15 @@ export default function ConsentPage() {
                 snehasish.satpathy01@gmail.com
               </a>
             </p>
-            <p>IRB Protocol: Pending</p>
+            <p>
+              Approved by the Indiana Wesleyan University Institutional Review
+              Board — IRB Protocol #2385, approved October 9, 2026.
+            </p>
+            <p>
+              Questions about your rights as a research participant: IWU
+              Institutional Review Board, 4201 South Washington Street, Marion,
+              IN 46953 · 765-677-1402
+            </p>
           </div>
         </div>
 

@@ -23,6 +23,8 @@ export default function ConvictionCanvas() {
   const [loading,     setLoading]     = useState(true);
   const [generating,  setGenerating]  = useState(false);
   const [error,       setError]       = useState("");
+  // Open by default every time the explore page loads.
+  const [guideOpen,   setGuideOpen]   = useState(true);
   const [addingOwn,   setAddingOwn]   = useState(false);
   const [ownContent,  setOwnContent]  = useState("");
   const [ownEdgeType, setOwnEdgeType] = useState<EdgeType>("observe_world");
@@ -374,6 +376,14 @@ export default function ConvictionCanvas() {
     }
   }
 
+  function closeGuide() {
+    setGuideOpen(false);
+  }
+
+  function toggleGuide() {
+    setGuideOpen(open => !open);
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   if (loading) {
@@ -399,11 +409,61 @@ export default function ConvictionCanvas() {
 
       {/* ── Header ── */}
       <div className="space-y-1">
-        <p className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Exploring</p>
+        <div className="flex items-start justify-between gap-4">
+          <p className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Exploring</p>
+          <button
+            onClick={toggleGuide}
+            className="shrink-0 text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-colors whitespace-nowrap"
+          >
+            {guideOpen ? "Hide guide" : "How this works"}
+          </button>
+        </div>
         <h1 className="text-2xl font-semibold tracking-tight leading-snug">
           {question || root?.content || "Your conviction"}
         </h1>
       </div>
+
+      {/* ── Get-started guide ── */}
+      {guideOpen && (
+        <div className="border border-zinc-100 rounded-lg p-6 space-y-4 bg-zinc-900">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-sm font-semibold tracking-wide text-zinc-100 uppercase">Get started</p>
+            <button
+              onClick={closeGuide}
+              className="shrink-0 text-xs font-medium text-zinc-400 hover:text-zinc-100 transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+          <ol className="text-sm text-zinc-300 leading-relaxed space-y-3 list-decimal list-outside pl-5 marker:text-zinc-500 marker:font-mono marker:text-xs">
+            <li>
+              <span className="text-zinc-100 font-medium">Your conviction</span> sits at the top of the
+              reasoning graph below.
+            </li>
+            <li>
+              Cards under <span className="text-zinc-100 font-medium">Explore further</span>{" "}
+              offer new angles on it. Read one, then{" "}
+              <span className="text-zinc-100 font-medium">Endorse</span>{" "}
+              it to fold it into your reasoning, or{" "}
+              <span className="text-zinc-100 font-medium">Dismiss</span>{" "}
+              it and move on — click &ldquo;read more&rdquo; first if you want the full argument.
+            </li>
+            <li>
+              After you act on a card, you&apos;ll be asked to briefly re-rate where you currently stand.
+            </li>
+            <li>
+              Use <span className="text-zinc-100 font-medium">+ Add your own reasoning</span>{" "}
+              any time to bring in a point of your own.
+            </li>
+            <li>
+              There&apos;s no required number of cards — click{" "}
+              <span className="text-zinc-100 font-medium">I&apos;ve reached my position</span>{" "}
+              whenever you&apos;re ready to write up your reasoning. There are no right or wrong
+              answers.
+            </li>
+          </ol>
+        </div>
+      )}
 
       {/* ── Dissonance card ── */}
       {triggered && (
