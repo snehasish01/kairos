@@ -189,6 +189,12 @@ alter table participants
 -- random and silent dropped for pilot — restore for full study
 
 
+-- ── 10. Word counts on participant free-text ──────────────────────────────────
+-- Written by /api/rationale and /api/trigger/[id] (limits in lib/word-limits.ts).
+-- Must be applied before deploying the word-limit change, or those writes fail.
+alter table final_rationale add column if not exists word_count int;
+alter table prompt_events   add column if not exists word_count int;
+
 -- ── Verification queries (run after migration to confirm) ─────────────────────
 -- select table_name from information_schema.tables
 --   where table_schema = 'public'

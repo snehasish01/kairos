@@ -134,6 +134,7 @@ export interface DbPromptEvent {
   fired_at:      string;
   prompt_text:   string;
   response_text: string | null;
+  word_count:    number | null;
   response_code: ResponseCode | null;  // coded post-hoc, offline
   created_at:    string;
 }
@@ -147,6 +148,7 @@ export interface DbFinalRationale {
   id:           string;
   session_id:   string;
   text:         string;
+  word_count:   number | null;
   committed_at: string;
 }
 

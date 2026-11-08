@@ -93,17 +93,12 @@ function commitmentScore(events: EventRow[], priorLean = 0): number {
         ? e.payload["weight"] : 1;
       return sum + w;
     }, 0);
-  // Denominator counts only meaningful interactions; passive dwell events excluded
-  // so a participant who dwells a lot doesn't dilute their endorsement signal.
-  const MEANINGFUL = new Set(["endorse", "endorse_weighted", "dismiss", "add_own"]);
-  const meaningfulCount = recent.filter(e => MEANINGFUL.has(e.event_type)).length;
-  const endorseWeightedRateOld = recent.length > 0 ? endorseWeightedSum / recent.length : 0;
-  const endorseWeightedRate    = meaningfulCount > 0 ? endorseWeightedSum / meaningfulCount : 0;
+  // Denominator: all events in the recent window (ARCHITECTURE.md: "over last N events").
+  const endorseWeightedRate = recent.length > 0 ? endorseWeightedSum / recent.length : 0;
   console.log(
     "[KAIROS:commitment]",
     `endorseWeightedSum=${endorseWeightedSum.toFixed(3)}`,
-    `| denom_old=${recent.length} (all recent)  rate_old=${endorseWeightedRateOld.toFixed(3)}`,
-    `| denom_new=${meaningfulCount} (meaningful)  rate_new=${endorseWeightedRate.toFixed(3)}`,
+    `| denom=${recent.length} (all recent)  rate=${endorseWeightedRate.toFixed(3)}`,
   );
 
   return Math.min(1, 0.6 * currentLean + 0.4 * endorseWeightedRate);

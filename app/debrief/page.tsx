@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { prolificCompletionUrl } from "@/lib/prolific";
 
 interface DebriefData {
   initialLean:      number;
@@ -19,6 +20,8 @@ export default function DebriefPage() {
   const [question, setQuestion] = useState("");
   const [data,     setData]     = useState<DebriefData | null>(null);
   const [loadErr,  setLoadErr]  = useState("");
+  // Set only when /rationale saved successfully for this session and a completion code is configured.
+  const [completionUrl, setCompletionUrl] = useState<string | null>(null);
 
   const [email,       setEmail]       = useState("");
   const [emailState,  setEmailState]  = useState<"idle" | "submitting" | "done" | "error">("idle");
@@ -33,6 +36,9 @@ export default function DebriefPage() {
     const q   = sessionStorage.getItem("kairos_question") ?? "";
     setQuestion(q);
     if (!sid) { setLoadErr("No active session."); return; }
+    if (sessionStorage.getItem("kairos_rationale_saved_sid") === sid) {
+      setCompletionUrl(prolificCompletionUrl());
+    }
 
     fetch(`/api/debrief?session_id=${sid}`)
       .then(r => r.json())
@@ -183,6 +189,14 @@ export default function DebriefPage() {
         <p className="text-sm text-zinc-400 leading-relaxed">
           Your exploration has been recorded. You can close this window.
         </p>
+        {completionUrl && (
+          <a
+            href={completionUrl}
+            className="inline-block bg-zinc-100 text-zinc-950 rounded-lg px-5 py-2 text-sm font-medium hover:bg-white transition-colors"
+          >
+            Return to Prolific to complete
+          </a>
+        )}
       </section>
 
       {/* ── Email opt-in ── */}

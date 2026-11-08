@@ -172,11 +172,13 @@ export default function ConvictionCanvas() {
 
   async function handleDissonanceResponse(response: string) {
     if (!triggerId) return;
-    await fetch(`/api/trigger/${triggerId}`, {
+    const res = await fetch(`/api/trigger/${triggerId}`, {
       method:  "PATCH",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ response }),
-    }).catch(() => {});
+    });
+    // Throwing keeps DissonanceCard open with an error instead of "Response recorded".
+    if (!res.ok) throw new Error("Failed to save response");
     if (pendingNavToRationale) {
       router.push("/rationale");
     }

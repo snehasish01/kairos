@@ -2,6 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  ALREADY_PARTICIPATED_MSG,
+  captureProlificParams,
+  getProlificIds,
+  isTestPid,
+  type ProlificIds,
+} from "@/lib/prolific";
 
 const AGE_RANGES = ["Under 18", "18–24", "25–34", "35–44", "45–54", "55–64", "65+"];
 const EDUCATION_LEVELS = [
@@ -35,8 +42,36 @@ export default function OnboardPage() {
   const [reasons,          setReasons]           = useState("");
   const [submitting,       setSubmitting]        = useState(false);
   const [error,            setError]             = useState("");
+  const [prolific,         setProlific]          = useState<ProlificIds | null>(null);
+  const [prolificStatus,   setProlificStatus]    = useState<"checking" | "missing" | "already" | "ok">("checking");
 
   const priorLean = leanRaw / 100;
+
+  // Prolific gate: capture IDs from the URL (if this is the entry page), then require a
+  // PROLIFIC_PID and check for repeat participation before showing the form.
+  useEffect(() => {
+    captureProlificParams();
+    const ids = getProlificIds();
+    if (!ids) {
+      // One-time read of sessionStorage on mount, not a subscription/external-store sync.
+      setProlificStatus("missing"); // eslint-disable-line react-hooks/set-state-in-effect
+      return;
+    }
+    setProlific(ids);
+    if (isTestPid(ids.pid)) {
+      setProlificStatus("ok");
+      return;
+    }
+    fetch("/api/participants/check", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ prolific_pid: ids.pid }),
+    })
+      .then(r => (r.ok ? r.json() : { alreadyParticipated: false }))
+      .then((d: { alreadyParticipated?: boolean }) => setProlificStatus(d.alreadyParticipated ? "already" : "ok"))
+      // If the check itself fails, continue; the unique index still blocks repeats at insert.
+      .catch(() => setProlificStatus("ok"));
+  }, []);
 
   useEffect(() => {
     fetch("/api/topics")
@@ -66,6 +101,11 @@ export default function OnboardPage() {
       return;
     }
 
+    if (!prolific) {
+      setProlificStatus("missing");
+      return;
+    }
+
     const selectedTopic = topics.find(t => t.id === selectedTopicId);
     if (!selectedTopic) {
       setError("Topic not found. Refresh and try again.");
@@ -77,8 +117,19 @@ export default function OnboardPage() {
       const res = await fetch("/api/participants", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ age_range: ageRange, education }),
+        body:    JSON.stringify({
+          age_range:           ageRange,
+          education,
+          prolific_pid:        prolific.pid,
+          prolific_study_id:   prolific.studyId,
+          prolific_session_id: prolific.sessionId,
+        }),
       });
+      if (res.status === 409) {
+        setProlificStatus("already");
+        setSubmitting(false);
+        return;
+      }
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error((body as { error?: string }).error ?? "Server error");
@@ -106,6 +157,18 @@ export default function OnboardPage() {
 
   const inputCls = "w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-100";
   const labelCls = "block text-sm font-medium text-zinc-300";
+
+  if (prolificStatus !== "ok") {
+    return (
+      <main className="flex-1 flex items-center justify-center px-4 py-16">
+        <p className="max-w-md text-center text-sm text-zinc-300 leading-relaxed">
+          {prolificStatus === "checking" && "One moment…"}
+          {prolificStatus === "missing"  && "This study must be opened from Prolific. Please return to Prolific and open the study from there."}
+          {prolificStatus === "already"  && ALREADY_PARTICIPATED_MSG}
+        </p>
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 flex items-center justify-center px-4 py-16">

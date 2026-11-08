@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import WordLimitCounter from "@/components/WordLimitCounter";
+import { MIN_WORDS_FINAL, MAX_WORDS_FINAL, countWords, truncateToWords } from "@/lib/word-limits";
 
 export default function RationalePage() {
   const router = useRouter();
@@ -25,8 +27,8 @@ export default function RationalePage() {
     setQuestion(q);
   }, []);
 
-  const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
-  const ready     = text.trim().length > 0 && !submitting;
+  const wordCount = countWords(text);
+  const ready     = wordCount >= MIN_WORDS_FINAL && wordCount <= MAX_WORDS_FINAL && !submitting;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -43,6 +45,8 @@ export default function RationalePage() {
         const body = await res.json().catch(() => ({}));
         throw new Error((body as { error?: string }).error ?? "Failed to save rationale");
       }
+      // Lets /debrief show the Prolific completion button only after a successful save.
+      sessionStorage.setItem("kairos_rationale_saved_sid", sessionId);
       router.push("/debrief");
     } catch (err) {
       setError((err as Error).message);
@@ -90,16 +94,14 @@ export default function RationalePage() {
         <textarea
           rows={10}
           value={text}
-          onChange={e => setText(e.target.value)}
+          onChange={e => setText(truncateToWords(e.target.value, MAX_WORDS_FINAL))}
           placeholder="Write your final reasoning here…"
           className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-100 resize-none leading-relaxed"
           autoFocus
         />
 
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-mono text-zinc-500">
-            {wordCount > 0 ? `${wordCount} word${wordCount === 1 ? "" : "s"}` : ""}
-          </span>
+        <div className="flex items-start justify-between gap-4">
+          <WordLimitCounter count={wordCount} min={MIN_WORDS_FINAL} max={MAX_WORDS_FINAL} />
           <button
             type="submit"
             disabled={!ready}

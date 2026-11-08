@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin }                from "@/lib/supabase";
 import { computeSignals, type EventRow } from "@/lib/signal-processor";
 import type { DbNode }                   from "@/lib/conviction-graph";
+import { MIN_WORDS_FINAL, MAX_WORDS_FINAL, countWords, wordLimitError } from "@/lib/word-limits";
 
 type NodeRow = Pick<DbNode, "id" | "edge_type" | "valence">;
 
@@ -17,6 +18,12 @@ export async function POST(req: NextRequest) {
   if (!session_id || !text?.trim()) {
     return NextResponse.json({ error: "session_id and text required" }, { status: 400 });
   }
+
+  const limitErr = wordLimitError(text.trim(), MIN_WORDS_FINAL, MAX_WORDS_FINAL);
+  if (limitErr) {
+    return NextResponse.json({ error: limitErr }, { status: 400 });
+  }
+  const wordCount = countWords(text.trim());
 
   const { data: session } = await supabaseAdmin
     .from("sessions")
@@ -73,7 +80,7 @@ export async function POST(req: NextRequest) {
   // if the participant refreshes the rationale page and resubmits.
   const { error: rationaleErr } = await supabaseAdmin
     .from("final_rationale")
-    .upsert({ session_id, text: text.trim() }, { onConflict: "session_id" });
+    .upsert({ session_id, text: text.trim(), word_count: wordCount }, { onConflict: "session_id" });
 
   if (rationaleErr) {
     console.error("[rationale] insert:", rationaleErr);
@@ -103,7 +110,7 @@ export async function POST(req: NextRequest) {
 
   console.log("[rationale]", {
     session_id,
-    word_count:           text.trim().split(/\s+/).filter(Boolean).length,
+    word_count:           wordCount,
     trigger_answered:     triggerAnswered,
     equilibrium_reached:  signals.equilibriumReached,
     hardened_prematurely: hardenedPrematurely,
