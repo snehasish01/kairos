@@ -9,6 +9,7 @@ import NodeCard, { type DwellLogger } from "./NodeCard";
 import LeanSlider from "./LeanSlider";
 import DissonanceCard from "./DissonanceCard";
 import { EDGE_TYPES, EDGE_LABEL } from "@/lib/ui-constants";
+import { usePasteGuard, PASTE_BLOCKED_MSG } from "@/lib/use-paste-guard";
 
 const VALENCES: Valence[] = ["supports", "undermines", "neutral"];
 
@@ -27,6 +28,7 @@ export default function ConvictionCanvas() {
   const [guideOpen,   setGuideOpen]   = useState(true);
   const [addingOwn,   setAddingOwn]   = useState(false);
   const [ownContent,  setOwnContent]  = useState("");
+  const { guardProps: ownGuardProps, pasteBlocked: ownPasteBlocked } = usePasteGuard();
   const [ownEdgeType, setOwnEdgeType] = useState<EdgeType>("observe_world");
   const [ownValence,  setOwnValence]  = useState<Valence>("neutral");
   const [submitting,  setSubmitting]  = useState(false);
@@ -415,7 +417,7 @@ export default function ConvictionCanvas() {
           <p className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Exploring</p>
           <button
             onClick={toggleGuide}
-            className="shrink-0 text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-colors whitespace-nowrap"
+            className="shrink-0 text-xs font-mono text-zinc-400 hover:text-zinc-200 transition-colors whitespace-nowrap"
           >
             {guideOpen ? "Hide guide" : "How this works"}
           </button>
@@ -425,19 +427,22 @@ export default function ConvictionCanvas() {
         </h1>
       </div>
 
-      {/* ── Get-started guide ── */}
+      {/* ── Instructions (collapsible via "Got it" / "How this works") ── */}
       {guideOpen && (
-        <div className="border border-zinc-100 rounded-lg p-6 space-y-4 bg-zinc-900">
-          <div className="flex items-start justify-between gap-3">
-            <p className="text-sm font-semibold tracking-wide text-zinc-100 uppercase">Get started</p>
+        <section
+          aria-labelledby="instructions-heading"
+          className="border-2 border-zinc-300 rounded-lg p-6 space-y-4 bg-zinc-900 shadow-lg shadow-black/50"
+        >
+          <div className="flex items-center justify-between gap-3 pt-1 pr-1">
+            <h2 id="instructions-heading" className="text-lg font-semibold text-zinc-100">Instructions</h2>
             <button
               onClick={closeGuide}
-              className="shrink-0 text-xs font-medium text-zinc-400 hover:text-zinc-100 transition-colors"
+              className="shrink-0 min-h-11 min-w-11 rounded-md border border-zinc-500 bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-100 hover:border-zinc-300 hover:bg-zinc-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100"
             >
               Got it
             </button>
           </div>
-          <ol className="text-sm text-zinc-300 leading-relaxed space-y-3 list-decimal list-outside pl-5 marker:text-zinc-500 marker:font-mono marker:text-xs">
+          <ol className="text-base text-zinc-300 leading-relaxed space-y-3 list-decimal list-outside pl-5 marker:text-zinc-400 marker:font-mono marker:text-sm">
             <li>
               <span className="text-zinc-100 font-medium">Your conviction</span> sits at the top of the
               reasoning graph below.
@@ -464,7 +469,7 @@ export default function ConvictionCanvas() {
               answers.
             </li>
           </ol>
-        </div>
+        </section>
       )}
 
       {/* ── Dissonance card ── */}
@@ -482,7 +487,7 @@ export default function ConvictionCanvas() {
         <div>
           <button
             onClick={handleCommitIntent}
-            className="text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="min-h-11 rounded-md border border-zinc-600 bg-transparent px-4 py-2 text-sm font-medium text-zinc-200 hover:border-zinc-400 hover:text-zinc-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100"
           >
             I&apos;ve reached my position
           </button>
@@ -568,7 +573,11 @@ export default function ConvictionCanvas() {
               onChange={e => setOwnContent(e.target.value)}
               placeholder="What else are you thinking about this conviction?"
               className="w-full rounded-lg border border-zinc-600 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500 resize-none"
+              {...ownGuardProps}
             />
+            {ownPasteBlocked && (
+              <p role="status" className="text-sm text-zinc-300">{PASTE_BLOCKED_MSG}</p>
+            )}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-xs text-zinc-500 font-mono">Reasoning type</label>

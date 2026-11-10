@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import WordLimitCounter from "@/components/WordLimitCounter";
+import { usePasteGuard, PASTE_BLOCKED_MSG } from "@/lib/use-paste-guard";
 import { MIN_WORDS_FINAL, MAX_WORDS_FINAL, countWords, truncateToWords } from "@/lib/word-limits";
 
 export default function RationalePage() {
@@ -13,6 +14,7 @@ export default function RationalePage() {
   const [error,      setError]      = useState("");
   const [submitting, setSubmitting] = useState(false);
   const initialized = useRef(false);
+  const { guardProps, pasteBlocked } = usePasteGuard();
 
   useEffect(() => {
     if (initialized.current) return;
@@ -79,16 +81,25 @@ export default function RationalePage() {
         </div>
       )}
 
-      <div className="space-y-3">
-        <p className="text-sm text-zinc-300 leading-relaxed">
-          Write your final position on this question — including the considerations
-          that matter most to you and why you hold this view.
-        </p>
-        <p className="text-xs text-zinc-500 leading-relaxed">
-          Take your time. There are no right or wrong answers. This is your reasoning,
-          in your own words.
-        </p>
-      </div>
+      {/* Instructions: pinned on md+, collapsible (open by default) on all widths. */}
+      <details
+        open
+        className="border-2 border-zinc-300 rounded-lg px-5 py-4 bg-zinc-900 shadow-lg shadow-black/50 md:sticky md:top-4 md:z-20"
+      >
+        <summary className="cursor-pointer text-lg font-semibold text-zinc-100 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100">
+          Instructions
+        </summary>
+        <div className="mt-3 space-y-3">
+          <p className="text-base text-zinc-100 leading-relaxed">
+            Write your final position on this question — including the considerations
+            that matter most to you and why you hold this view.
+          </p>
+          <p className="text-base text-zinc-300 leading-relaxed">
+            Take your time. There are no right or wrong answers. This is your reasoning,
+            in your own words.
+          </p>
+        </div>
+      </details>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <textarea
@@ -98,7 +109,11 @@ export default function RationalePage() {
           placeholder="Write your final reasoning here…"
           className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-100 resize-none leading-relaxed"
           autoFocus
+          {...guardProps}
         />
+        {pasteBlocked && (
+          <p role="status" className="text-sm text-zinc-300">{PASTE_BLOCKED_MSG}</p>
+        )}
 
         <div className="flex items-start justify-between gap-4">
           <WordLimitCounter count={wordCount} min={MIN_WORDS_FINAL} max={MAX_WORDS_FINAL} />

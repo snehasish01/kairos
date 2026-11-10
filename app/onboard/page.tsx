@@ -9,6 +9,7 @@ import {
   isTestPid,
   type ProlificIds,
 } from "@/lib/prolific";
+import { usePasteGuard, PASTE_BLOCKED_MSG } from "@/lib/use-paste-guard";
 
 const AGE_RANGES = ["Under 18", "18–24", "25–34", "35–44", "45–54", "55–64", "65+"];
 const EDUCATION_LEVELS = [
@@ -43,6 +44,7 @@ export default function OnboardPage() {
   const [submitting,       setSubmitting]        = useState(false);
   const [error,            setError]             = useState("");
   const [prolific,         setProlific]          = useState<ProlificIds | null>(null);
+  const { guardProps, pasteBlocked } = usePasteGuard();
   const [prolificStatus,   setProlificStatus]    = useState<"checking" | "missing" | "already" | "ok">("checking");
 
   const priorLean = leanRaw / 100;
@@ -314,7 +316,11 @@ export default function OnboardPage() {
               onChange={e => setReasons(e.target.value)}
               placeholder="The main reasons I hold this view are…"
               className={`${inputCls} resize-none`}
+              {...guardProps}
             />
+            {pasteBlocked && (
+              <p role="status" className="text-sm text-zinc-300">{PASTE_BLOCKED_MSG}</p>
+            )}
           </div>
         </fieldset>
 

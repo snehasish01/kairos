@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import WordLimitCounter from "./WordLimitCounter";
+import { usePasteGuard, PASTE_BLOCKED_MSG } from "@/lib/use-paste-guard";
 import { MIN_WORDS_PROMPT, MAX_WORDS_PROMPT, countWords, truncateToWords } from "@/lib/word-limits";
 
 interface Props {
@@ -14,6 +15,7 @@ export default function DissonanceCard({ prompt, onSubmit }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted,  setSubmitted]  = useState(false);
   const [error,      setError]      = useState("");
+  const { guardProps, pasteBlocked } = usePasteGuard();
 
   const wordCount = countWords(response);
   const ready     = wordCount >= MIN_WORDS_PROMPT && wordCount <= MAX_WORDS_PROMPT && !submitting;
@@ -59,7 +61,11 @@ export default function DissonanceCard({ prompt, onSubmit }: Props) {
         onChange={e => setResponse(truncateToWords(e.target.value, MAX_WORDS_PROMPT))}
         placeholder="Take a moment to reflect and respond…"
         className="w-full rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-100 resize-none bg-zinc-800"
+        {...guardProps}
       />
+      {pasteBlocked && (
+        <p role="status" className="text-sm text-zinc-300">{PASTE_BLOCKED_MSG}</p>
+      )}
       <WordLimitCounter count={wordCount} min={MIN_WORDS_PROMPT} max={MAX_WORDS_PROMPT} />
       <button
         type="submit"
