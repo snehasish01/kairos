@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { rejectIfDemo } from "@/lib/demo/token";
 
 export async function POST(req: NextRequest) {
+  const demoBlocked = rejectIfDemo(req);
+  if (demoBlocked) return demoBlocked;
+
   let body: {
     participant_id?: string;
     question?: string;

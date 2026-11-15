@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin }                from "@/lib/supabase";
+import { rejectIfDemo } from "@/lib/demo/token";
 import { MIN_WORDS_PROMPT, MAX_WORDS_PROMPT, countWords, wordLimitError } from "@/lib/word-limits";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const demoBlocked = rejectIfDemo(req);
+  if (demoBlocked) return demoBlocked;
+
   const { id } = await params;
 
   let body: { response?: string };

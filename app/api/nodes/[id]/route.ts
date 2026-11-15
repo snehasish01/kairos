@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { rejectIfDemo } from "@/lib/demo/token";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const demoBlocked = rejectIfDemo(req);
+  if (demoBlocked) return demoBlocked;
+
   const { id } = await params;
 
   let body: { valence?: string; content?: string };
@@ -42,9 +46,12 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const demoBlocked = rejectIfDemo(req);
+  if (demoBlocked) return demoBlocked;
+
   const { id } = await params;
 
   const { error } = await supabaseAdmin.from("nodes").delete().eq("id", id);

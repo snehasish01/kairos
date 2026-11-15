@@ -53,6 +53,12 @@ const STUB_NODES: DbNode[] = [
 ];
 
 export async function GET() {
+  // Developer-only smoke test: it calls the Anthropic API with no auth or rate limit,
+  // so it must never be reachable on a public deployment.
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   const root = buildGraph(STUB_NODES);
   if (!root) {
     return NextResponse.json({ error: "Could not build test graph" }, { status: 500 });

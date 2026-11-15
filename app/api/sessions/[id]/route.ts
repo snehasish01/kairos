@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { rejectIfDemo } from "@/lib/demo/token";
 import { buildGraph } from "@/lib/conviction-graph";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const demoBlocked = rejectIfDemo(req);
+  if (demoBlocked) return demoBlocked;
+
   const { id } = await params;
 
   const [{ data: session, error: sErr }, { data: nodes, error: nErr }] =

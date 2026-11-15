@@ -10,6 +10,8 @@ import {
   type ProlificIds,
 } from "@/lib/prolific";
 import { usePasteGuard, PASTE_BLOCKED_MSG } from "@/lib/use-paste-guard";
+import { exitDemo, isDemoActive } from "@/lib/demo/client";
+import DemoEntry from "@/components/DemoEntry";
 
 const AGE_RANGES = ["Under 18", "18–24", "25–34", "35–44", "45–54", "55–64", "65+"];
 const EDUCATION_LEVELS = [
@@ -45,7 +47,7 @@ export default function OnboardPage() {
   const [error,            setError]             = useState("");
   const [prolific,         setProlific]          = useState<ProlificIds | null>(null);
   const { guardProps, pasteBlocked } = usePasteGuard();
-  const [prolificStatus,   setProlificStatus]    = useState<"checking" | "missing" | "already" | "ok">("checking");
+  const [prolificStatus,   setProlificStatus]    = useState<"checking" | "missing" | "already" | "ok" | "demo">("checking");
 
   const priorLean = leanRaw / 100;
 
@@ -55,10 +57,13 @@ export default function OnboardPage() {
     captureProlificParams();
     const ids = getProlificIds();
     if (!ids) {
+      // No Prolific parameters: the study is closed, so offer the no-data demo instead.
       // One-time read of sessionStorage on mount, not a subscription/external-store sync.
-      setProlificStatus("missing"); // eslint-disable-line react-hooks/set-state-in-effect
+      setProlificStatus(isDemoActive() ? "demo" : "missing"); // eslint-disable-line react-hooks/set-state-in-effect
       return;
     }
+    // Arriving from Prolific always leaves demo mode.
+    if (isDemoActive()) void exitDemo();
     setProlific(ids);
     if (isTestPid(ids.pid)) {
       setProlificStatus("ok");
@@ -103,7 +108,8 @@ export default function OnboardPage() {
       return;
     }
 
-    if (!prolific) {
+    const demo = prolificStatus === "demo";
+    if (!prolific && !demo) {
       setProlificStatus("missing");
       return;
     }
@@ -119,13 +125,15 @@ export default function OnboardPage() {
       const res = await fetch("/api/participants", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
+        // In demo mode this call is answered in the browser (lib/demo/local-api.ts);
+        // nothing is sent to the research database and no Prolific IDs exist.
+        body:    JSON.stringify(prolific ? {
           age_range:           ageRange,
           education,
           prolific_pid:        prolific.pid,
           prolific_study_id:   prolific.studyId,
           prolific_session_id: prolific.sessionId,
-        }),
+        } : { age_range: ageRange, education }),
       });
       if (res.status === 409) {
         setProlificStatus("already");
@@ -160,12 +168,15 @@ export default function OnboardPage() {
   const inputCls = "w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-100";
   const labelCls = "block text-sm font-medium text-zinc-300";
 
-  if (prolificStatus !== "ok") {
+  if (prolificStatus === "missing") {
+    return <DemoEntry onStarted={() => setProlificStatus("demo")} />;
+  }
+
+  if (prolificStatus !== "ok" && prolificStatus !== "demo") {
     return (
       <main className="flex-1 flex items-center justify-center px-4 py-16">
         <p className="max-w-md text-center text-sm text-zinc-300 leading-relaxed">
           {prolificStatus === "checking" && "One moment…"}
-          {prolificStatus === "missing"  && "This study must be opened from Prolific. Please return to Prolific and open the study from there."}
           {prolificStatus === "already"  && ALREADY_PARTICIPATED_MSG}
         </p>
       </main>

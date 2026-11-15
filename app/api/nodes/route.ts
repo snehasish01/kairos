@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { rejectIfDemo } from "@/lib/demo/token";
 import type { EdgeType, Valence, AuthoredBy } from "@/lib/conviction-graph";
 
 export async function GET(req: NextRequest) {
+  const demoBlocked = rejectIfDemo(req);
+  if (demoBlocked) return demoBlocked;
+
   const sid = req.nextUrl.searchParams.get("session_id");
   if (!sid) {
     return NextResponse.json({ error: "session_id required" }, { status: 400 });
@@ -25,6 +29,9 @@ const VALID_VALENCES    = new Set<string>(["supports", "undermines", "neutral"])
 const VALID_AUTHORED_BY = new Set<string>(["system", "user"]);
 
 export async function POST(req: NextRequest) {
+  const demoBlocked = rejectIfDemo(req);
+  if (demoBlocked) return demoBlocked;
+
   let body: {
     session_id?:  string;
     parent_id?:   string | null;

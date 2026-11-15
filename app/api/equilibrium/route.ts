@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin }                from "@/lib/supabase";
+import { rejectIfDemo } from "@/lib/demo/token";
 import { computeSignals, type EventRow } from "@/lib/signal-processor";
 import type { DbNode }                   from "@/lib/conviction-graph";
 
 type NodeRow = Pick<DbNode, "id" | "edge_type" | "valence">;
 
 export async function POST(req: NextRequest) {
+  const demoBlocked = rejectIfDemo(req);
+  if (demoBlocked) return demoBlocked;
+
   let body: { session_id?: string };
   try {
     body = await req.json();

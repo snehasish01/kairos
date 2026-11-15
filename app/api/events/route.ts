@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { rejectIfDemo } from "@/lib/demo/token";
 
 const VALID_EVENT_TYPES = new Set([
   "open", "expand", "dwell_start", "dwell_end",
@@ -8,6 +9,9 @@ const VALID_EVENT_TYPES = new Set([
 ]);
 
 export async function POST(req: NextRequest) {
+  const demoBlocked = rejectIfDemo(req);
+  if (demoBlocked) return demoBlocked;
+
   let body: {
     session_id:        string;
     node_id?:          string | null;
