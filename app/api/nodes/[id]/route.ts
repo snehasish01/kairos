@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { rejectIfDemo } from "@/lib/demo/token";
+import { guardResearch } from "@/lib/study-gate";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const demoBlocked = rejectIfDemo(req);
-  if (demoBlocked) return demoBlocked;
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
 
   const { id } = await params;
 
@@ -49,8 +49,8 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const demoBlocked = rejectIfDemo(req);
-  if (demoBlocked) return demoBlocked;
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
 
   const { id } = await params;
 

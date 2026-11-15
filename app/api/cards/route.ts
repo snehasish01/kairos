@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { buildGraph, DbNode } from "@/lib/conviction-graph";
 import { generateCards } from "@/lib/card-generator";
 import { hasDemoCookie, readDemo }      from "@/lib/demo/token";
+import { studyClosed, studyOpen }       from "@/lib/study-gate";
 import { demoCards }                    from "@/lib/demo/server";
 
 function demoExpired() {
@@ -26,6 +27,9 @@ export async function POST(req: NextRequest) {
 
   // A demo payload without a valid demo cookie (e.g. expired) must not reach the DB path.
   if (body && typeof body === "object" && "demo" in body) return demoExpired();
+
+  // Research path: closed unless STUDY_OPEN=true.
+  if (!studyOpen()) return studyClosed();
 
   const { session_id } = body;
   if (!session_id) {

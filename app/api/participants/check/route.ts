@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { rejectIfDemo } from "@/lib/demo/token";
+import { guardResearch } from "@/lib/study-gate";
 import { isTestPid } from "@/lib/prolific";
 
 // Early repeat-participation check for /onboard. The insert-time unique index on
 // prolific_pid remains the backstop. POST (not GET) keeps the ID out of URLs and access logs.
 export async function POST(req: NextRequest) {
-  const demoBlocked = rejectIfDemo(req);
-  if (demoBlocked) return demoBlocked;
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
 
   let body: { prolific_pid?: string };
   try {

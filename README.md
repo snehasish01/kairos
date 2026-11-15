@@ -3,7 +3,8 @@
 > **The pilot is closed. The public demo does not collect data.**
 > Data collection for the KAIROS pilot ended in November 2026 and the dataset is frozen.
 > Anyone can try the full participant flow in **demo mode**. Demo sessions are never written to
-> the research database, and they do not take part in condition assignment.
+> the research database, and they do not take part in condition assignment. The research
+> routes are closed by default (`STUDY_OPEN` unset) and refuse every request.
 
 KAIROS is a research instrument, not a consumer product. It runs a between-subjects experiment
 on **when** a self-referential reflective ("dissonance") prompt should be delivered while
@@ -66,7 +67,7 @@ needed.
 ```bash
 npm run test:signals     # signal-processor unit tests
 npm run test:trigger     # trigger-engine unit tests
-npm run test:demo        # demo isolation + research-path regression (mock DB, no network)
+npm run test:demo        # closed-study gate, demo isolation, research-path regression (mock DB, no network)
 ```
 
 ### Environment variables
@@ -81,15 +82,28 @@ Names only. Never commit values. [`.env.example`](.env.example) lists all of the
 | `ANTHROPIC_API_KEY` | **server only** | Card and prompt generation |
 | `ANTHROPIC_MODEL` | server | Optional model override |
 | `NEXT_PUBLIC_PROLIFIC_COMPLETION_CODE` | browser | Prolific completion code (research path only) |
+| `STUDY_OPEN` | server | `true` opens the research routes for data collection. **Unset (the default) means closed**, and every research route returns 403 |
 | `DEMO_TOKEN_SECRET` | **server only** | HMAC secret for the demo cookie. The demo is disabled when unset |
 | `DEMO_LLM_ENABLED` | server | `true` makes the demo call the Anthropic API (rate-limited). Anything else uses canned cards and the fixed fallback prompt |
 | `DEMO_MAX_LLM_CALLS_PER_SESSION` | server | Hard cap per demo session (default 15) |
 | `DEMO_MAX_LLM_CALLS_PER_IP_PER_HOUR` | server | Per-IP limit (default 30) |
 | `DEMO_MAX_LLM_CALLS_PER_DAY` | server | Global daily ceiling per server instance (default 300) |
 
+## Study gate
+
+The research routes write to participants, sessions, nodes, events, lean samples, triggers,
+prompt events, final rationale, session outcome and the mailing list. They are **closed unless
+`STUDY_OPEN=true`**. While closed, both `proxy.ts` and each route return
+`403 {"code": "study_closed"}` before touching the database or the Anthropic API. Someone
+arriving from a Prolific link sees "This study is closed and is no longer accepting
+participants." when they submit the onboarding form. Only the read-only topic list
+and the demo stay available. With `STUDY_OPEN=true` the research path behaves exactly as at
+tag `v1.0-pilot`. Set it only on a deployment that is actively collecting data.
+
 ## Demo mode
 
-Opening the app without Prolific parameters offers **"Try the demo"**:
+Opening the app without Prolific parameters offers **"Try the demo"**. The demo works whether
+or not the study is open:
 
 - The server issues a signed `kairos_demo` cookie. While that cookie is present, a server-side
   `proxy.ts` and a guard in each research route **refuse** every route that writes research

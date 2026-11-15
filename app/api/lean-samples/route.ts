@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin }                from "@/lib/supabase";
-import { rejectIfDemo } from "@/lib/demo/token";
+import { guardResearch } from "@/lib/study-gate";
 
 export async function POST(req: NextRequest) {
-  const demoBlocked = rejectIfDemo(req);
-  if (demoBlocked) return demoBlocked;
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
 
   let body: { session_id?: string; node_id?: string | null; lean_value?: number };
   try {

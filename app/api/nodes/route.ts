@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { rejectIfDemo } from "@/lib/demo/token";
+import { guardResearch } from "@/lib/study-gate";
 import type { EdgeType, Valence, AuthoredBy } from "@/lib/conviction-graph";
 
 export async function GET(req: NextRequest) {
-  const demoBlocked = rejectIfDemo(req);
-  if (demoBlocked) return demoBlocked;
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
 
   const sid = req.nextUrl.searchParams.get("session_id");
   if (!sid) {
@@ -29,8 +29,8 @@ const VALID_VALENCES    = new Set<string>(["supports", "undermines", "neutral"])
 const VALID_AUTHORED_BY = new Set<string>(["system", "user"]);
 
 export async function POST(req: NextRequest) {
-  const demoBlocked = rejectIfDemo(req);
-  if (demoBlocked) return demoBlocked;
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
 
   let body: {
     session_id?:  string;

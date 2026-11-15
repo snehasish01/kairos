@@ -10,13 +10,15 @@
 // .env.local is never used. The run aborts unless the mock itself serves the first DB read.
 //
 // Proves:
+//   0. With STUDY_OPEN unset (the default) every research route answers 403 study_closed
+//      without touching the DB or Anthropic, while the demo keeps working.
 //   1. A full demo run (both pilot conditions) writes ZERO rows to any research table, makes
 //      no research-table request at all, and does not consume the condition counter.
 //   2. Every research route refuses requests carrying the demo cookie (403), and demo
 //      payloads without a valid cookie are refused (401).
 //   3. Demo LLM usage is capped per session and per IP, and replaying an older cookie does
 //      not reset the cap; canned content is served once over budget.
-//   4. The Prolific path still writes the same rows, makes the same DB requests and returns
+//   4. With STUDY_OPEN=true, the Prolific path still writes the same rows, makes the same DB requests and returns
 //      the same responses as before (exact diff against --pilot when given), including the
 //      count % 2 condition alternation and the duplicate-participant rejection.
 
@@ -72,6 +74,7 @@ async function startApp(appDir: string, mockUrl: string, extraEnv: Record<string
     DEMO_MAX_LLM_CALLS_PER_SESSION: "",
     DEMO_MAX_LLM_CALLS_PER_IP_PER_HOUR: "",
     DEMO_MAX_LLM_CALLS_PER_DAY:    "",
+    STUDY_OPEN:                    "",
     ...extraEnv,
   };
   const nextBin = path.join(appDir, "node_modules", ".bin", "next");
@@ -275,6 +278,74 @@ async function demoRun(base: string, condition: DemoCondition) {
   return { cardsRes, earlyFire, commit, shortResp, okResp, ration, debrief, mailing, serverCalls, cookie, prompt: state.trigger?.prompt ?? commit.prompt };
 }
 
+// Demo isolation checks against a running app. Returns nothing; records via check().
+async function demoIsolation(app: App, mock: MockBackend, label: string) {
+  mock.step = "demo";
+  const before = Object.fromEntries(RESEARCH_TABLES.map(t => [t, JSON.stringify(mock.rows(t))]));
+
+  // Every research route must refuse a request that carries the demo cookie.
+  const cookie = await startDemo(app.base);
+  const fakeId = "00000000-0000-4000-8000-000000000000";
+  const research: [string, string, unknown?][] = [
+    ["POST", "/api/participants", { age_range: "x", education: "y", prolific_pid: "test1" }],
+    ["POST", "/api/participants/check", { prolific_pid: "abc" }],
+    ["POST", "/api/sessions", { participant_id: fakeId, question: "q" }],
+    ["GET",  `/api/sessions/${fakeId}`],
+    ["GET",  `/api/nodes?session_id=${fakeId}`],
+    ["POST", "/api/nodes", { session_id: fakeId, content: "c" }],
+    ["PATCH", `/api/nodes/${fakeId}`, { content: "c" }],
+    ["DELETE", `/api/nodes/${fakeId}`],
+    ["POST", "/api/events", { session_id: fakeId, event_type: "open" }],
+    ["POST", "/api/lean-samples", { session_id: fakeId, lean_value: 0 }],
+    ["PATCH", `/api/trigger/${fakeId}`, { response: words(30) }],
+    ["POST", "/api/rationale", { session_id: fakeId, text: words(60) }],
+    ["POST", "/api/equilibrium", { session_id: fakeId }],
+    ["GET",  `/api/debrief?session_id=${fakeId}`],
+    ["POST", "/api/mailing-list", { email: "a@b.co" }],
+    ["GET",  "/api/cards/test"],
+    ["GET",  "/api/trigger"],
+  ];
+  const statuses: string[] = [];
+  for (const [m, p, b] of research) {
+    const r = await api(app.base, m, p, b, cookie);
+    statuses.push(`${r.status}`);
+    check(r.status === 403, `demo cookie → ${m} ${p.split("?")[0]} refused (got ${r.status})`);
+  }
+  // The route-level guard (not only proxy.ts) also refuses, even with an invalid cookie value.
+  const forged = await api(app.base, "POST", "/api/participants", { age_range: "x", education: "y", prolific_pid: "test2" }, "kairos_demo=forged");
+  check(forged.status === 403, `forged demo cookie → research route refused (got ${forged.status})`);
+  const forgedCards = await api(app.base, "POST", "/api/cards", { demo: { nodes: [] } }, "kairos_demo=forged");
+  check(forgedCards.status === 401, `forged demo cookie → demo branch refused (got ${forgedCards.status})`);
+  const noCookie = await api(app.base, "POST", "/api/trigger", { demo: { condition: "reactive" } });
+  check(noCookie.status === 401, `demo payload without cookie → refused before DB (got ${noCookie.status})`);
+
+  // Full demo runs for both pilot conditions.
+  for (const condition of ["reactive", "anticipatory"] as DemoCondition[]) {
+    const run = await demoRun(app.base, condition);
+    console.log(`  · ${condition}: server calls = ${[...new Set(run.serverCalls)].join(", ")}`);
+    check(run.cardsRes.status === 200 && (run.cardsRes.body as { source?: string }).source === "canned", `${condition}: canned cards served (LLM disabled)`);
+    check(run.serverCalls.every(c => c === "POST /api/cards" || c === "POST /api/trigger"), `${condition}: browser only calls the demo branches of /api/cards and /api/trigger`);
+    check(run.shortResp?.status === 400, `${condition}: prompt response word minimum enforced (same limits as study)`);
+    check(run.ration.status === 200, `${condition}: rationale accepted locally`);
+    check(run.mailing.status === 403, `${condition}: mailing list unavailable in demo`);
+    if (condition === "reactive") {
+      check(!run.earlyFire, "reactive: no prompt before commit");
+      check(run.commit.triggered === true && !run.commit.alreadyFired, "reactive: prompt fires after \"I've reached my position\"");
+    }
+    if (run.debrief.promptFired) check(run.prompt === DEMO_CANNED_PROMPT, `${condition}: prompt text is the condition-independent canned prompt`);
+    check(typeof run.debrief.initialLean === "number" && typeof run.debrief.finalLean === "number", `${condition}: debrief portrait computed`);
+  }
+
+  const demoLog = mock.log.filter(r => r.step === "demo");
+  const demoResearch = demoLog.filter(r => RESEARCH_TABLES.includes(r.table));
+  check(demoResearch.length === 0, `[${label}] demo phase made 0 requests to research tables (made ${demoResearch.length})`);
+  check(demoLog.every(r => r.table === "topics" && r.method === "GET"), `demo phase DB traffic is only GET topics (${demoLog.length} requests)`);
+  check(demoLog.filter(r => r.table === "anthropic").length === 0, "demo phase made 0 Anthropic calls with DEMO_LLM_ENABLED unset");
+  const changed = RESEARCH_TABLES.filter(t => JSON.stringify(mock.rows(t)) !== before[t]);
+  check(changed.length === 0, `[${label}] research tables unchanged after demo runs (changed: ${changed.join(", ") || "none"})`);
+
+}
+
 // ── main ───────────────────────────────────────────────────────────────────
 async function main() {
   const args = process.argv.slice(2);
@@ -283,81 +354,63 @@ async function main() {
   const apps: App[] = [];
 
   try {
-    // ── Run 1: branch app, live LLM disabled (production default) ─────────
-    console.log(`\n[1] Demo isolation  (app: ${appDir}, DEMO_LLM_ENABLED unset)`);
+    // ── Run 1: default deployment — study CLOSED, live LLM disabled ───────
+    console.log(`\n[1] Study closed (STUDY_OPEN unset) + demo isolation  (app: ${appDir})`);
+    const cm = new MockBackend();
+    const cmUrl = await cm.start();
+    seed(cm);
+    const capp = await startApp(appDir, cmUrl, {});
+    apps.push(capp);
+    if (!cm.log.some(r => r.table === "topics")) throw new Error("app is not talking to the mock DB; aborting");
+
+    cm.step = "closed";
+    const closedFakeId = "00000000-0000-4000-8000-000000000000";
+    const closedCalls: [string, string, unknown?][] = [
+      ["POST", "/api/participants/check", { prolific_pid: "5f00000000000000000000aa" }],
+      ["POST", "/api/participants", { age_range: "x", education: "y", prolific_pid: "5f00000000000000000000aa" }],
+      ["POST", "/api/sessions", { participant_id: closedFakeId, question: "q" }],
+      ["GET",  `/api/sessions/${closedFakeId}`],
+      ["GET",  `/api/nodes?session_id=${closedFakeId}`],
+      ["POST", "/api/nodes", { session_id: closedFakeId, content: "c" }],
+      ["PATCH", `/api/nodes/${closedFakeId}`, { content: "c" }],
+      ["DELETE", `/api/nodes/${closedFakeId}`],
+      ["POST", "/api/events", { session_id: closedFakeId, event_type: "open" }],
+      ["POST", "/api/lean-samples", { session_id: closedFakeId, lean_value: 0 }],
+      ["POST", "/api/cards", { session_id: closedFakeId }],
+      ["POST", "/api/trigger", { session_id: closedFakeId }],
+      ["PATCH", `/api/trigger/${closedFakeId}`, { response: words(30) }],
+      ["POST", "/api/rationale", { session_id: closedFakeId, text: words(60) }],
+      ["POST", "/api/equilibrium", { session_id: closedFakeId }],
+      ["GET",  `/api/debrief?session_id=${closedFakeId}`],
+      ["POST", "/api/mailing-list", { email: "a@b.co" }],
+      ["GET",  "/api/cards/test"],
+    ];
+    for (const [m, p, b] of closedCalls) {
+      const r = await api(capp.base, m, p, b);
+      const code = (r.json as { code?: string } | null)?.code;
+      check(r.status === 403 && code === "study_closed", `study closed → ${m} ${p.split("?")[0]} refused (got ${r.status} ${code ?? ""})`);
+    }
+    const closedLog = cm.log.filter(r => r.step === "closed");
+    check(closedLog.length === 0, `closed study: 0 DB / Anthropic requests from research routes (made ${closedLog.length})`);
+    const topicsClosed = await api(capp.base, "GET", "/api/topics");
+    check(topicsClosed.status === 200, "closed study: read-only topic list still served (needed by the demo)");
+
+    await demoIsolation(capp, cm, "closed");
+    stopApp(capp); apps.pop();
+    await cm.stop();
+
+    // ── Run 2: study OPEN — demo still isolated, research path as in pilot ──
+    console.log(`\n[2] Study open (STUDY_OPEN=true): demo isolation, then the Prolific path on the same server`);
     const mock = new MockBackend();
     const mockUrl = await mock.start();
     seed(mock);
-    const app = await startApp(appDir, mockUrl, {});
+    const app = await startApp(appDir, mockUrl, { STUDY_OPEN: "true" });
     apps.push(app);
     if (!mock.log.some(r => r.table === "topics")) throw new Error("app is not talking to the mock DB; aborting");
-
-    mock.step = "demo";
     const before = Object.fromEntries(RESEARCH_TABLES.map(t => [t, JSON.stringify(mock.rows(t))]));
-
-    // Every research route must refuse a request that carries the demo cookie.
-    const cookie = await startDemo(app.base);
-    const fakeId = "00000000-0000-4000-8000-000000000000";
-    const research: [string, string, unknown?][] = [
-      ["POST", "/api/participants", { age_range: "x", education: "y", prolific_pid: "test1" }],
-      ["POST", "/api/participants/check", { prolific_pid: "abc" }],
-      ["POST", "/api/sessions", { participant_id: fakeId, question: "q" }],
-      ["GET",  `/api/sessions/${fakeId}`],
-      ["GET",  `/api/nodes?session_id=${fakeId}`],
-      ["POST", "/api/nodes", { session_id: fakeId, content: "c" }],
-      ["PATCH", `/api/nodes/${fakeId}`, { content: "c" }],
-      ["DELETE", `/api/nodes/${fakeId}`],
-      ["POST", "/api/events", { session_id: fakeId, event_type: "open" }],
-      ["POST", "/api/lean-samples", { session_id: fakeId, lean_value: 0 }],
-      ["PATCH", `/api/trigger/${fakeId}`, { response: words(30) }],
-      ["POST", "/api/rationale", { session_id: fakeId, text: words(60) }],
-      ["POST", "/api/equilibrium", { session_id: fakeId }],
-      ["GET",  `/api/debrief?session_id=${fakeId}`],
-      ["POST", "/api/mailing-list", { email: "a@b.co" }],
-      ["GET",  "/api/cards/test"],
-      ["GET",  "/api/trigger"],
-    ];
-    const statuses: string[] = [];
-    for (const [m, p, b] of research) {
-      const r = await api(app.base, m, p, b, cookie);
-      statuses.push(`${r.status}`);
-      check(r.status === 403, `demo cookie → ${m} ${p.split("?")[0]} refused (got ${r.status})`);
-    }
-    // The route-level guard (not only proxy.ts) also refuses, even with an invalid cookie value.
-    const forged = await api(app.base, "POST", "/api/participants", { age_range: "x", education: "y", prolific_pid: "test2" }, "kairos_demo=forged");
-    check(forged.status === 403, `forged demo cookie → research route refused (got ${forged.status})`);
-    const forgedCards = await api(app.base, "POST", "/api/cards", { demo: { nodes: [] } }, "kairos_demo=forged");
-    check(forgedCards.status === 401, `forged demo cookie → demo branch refused (got ${forgedCards.status})`);
-    const noCookie = await api(app.base, "POST", "/api/trigger", { demo: { condition: "reactive" } });
-    check(noCookie.status === 401, `demo payload without cookie → refused before DB (got ${noCookie.status})`);
-
-    // Full demo runs for both pilot conditions.
-    for (const condition of ["reactive", "anticipatory"] as DemoCondition[]) {
-      const run = await demoRun(app.base, condition);
-      console.log(`  · ${condition}: server calls = ${[...new Set(run.serverCalls)].join(", ")}`);
-      check(run.cardsRes.status === 200 && (run.cardsRes.body as { source?: string }).source === "canned", `${condition}: canned cards served (LLM disabled)`);
-      check(run.serverCalls.every(c => c === "POST /api/cards" || c === "POST /api/trigger"), `${condition}: browser only calls the demo branches of /api/cards and /api/trigger`);
-      check(run.shortResp?.status === 400, `${condition}: prompt response word minimum enforced (same limits as study)`);
-      check(run.ration.status === 200, `${condition}: rationale accepted locally`);
-      check(run.mailing.status === 403, `${condition}: mailing list unavailable in demo`);
-      if (condition === "reactive") {
-        check(!run.earlyFire, "reactive: no prompt before commit");
-        check(run.commit.triggered === true && !run.commit.alreadyFired, "reactive: prompt fires after \"I've reached my position\"");
-      }
-      if (run.debrief.promptFired) check(run.prompt === DEMO_CANNED_PROMPT, `${condition}: prompt text is the condition-independent canned prompt`);
-      check(typeof run.debrief.initialLean === "number" && typeof run.debrief.finalLean === "number", `${condition}: debrief portrait computed`);
-    }
-
-    const demoLog = mock.log.filter(r => r.step === "demo");
-    const demoResearch = demoLog.filter(r => RESEARCH_TABLES.includes(r.table));
-    check(demoResearch.length === 0, `demo phase made 0 requests to research tables (made ${demoResearch.length})`);
-    check(demoLog.every(r => r.table === "topics" && r.method === "GET"), `demo phase DB traffic is only GET topics (${demoLog.length} requests)`);
-    check(demoLog.filter(r => r.table === "anthropic").length === 0, "demo phase made 0 Anthropic calls with DEMO_LLM_ENABLED unset");
-    const changed = RESEARCH_TABLES.filter(t => JSON.stringify(mock.rows(t)) !== before[t]);
-    check(changed.length === 0, `research tables unchanged after demo runs (changed: ${changed.join(", ") || "none"})`);
+    await demoIsolation(app, mock, "open");
 
     // Research path on the same server, after the demo: the counter was not advanced.
-    console.log("\n[2] Prolific path after demo runs (same server)");
     const branchMockLogStart = mock.log.length;
     const branch = await prolificScenario(app.base, mock);
     check(branch.conditions[0] === "reactive", `first Prolific participant after demos gets CONDITIONS[41 % 2] = reactive, i.e. demos did not advance the counter (got ${branch.conditions[0]})`);
@@ -374,7 +427,7 @@ async function main() {
     stopApp(app); apps.pop();
     await mock.stop();
 
-    // ── Run 2: exact diff of the research path against the pilot checkout ──
+    // ── Run 3: exact diff of the research path against the pilot checkout ──
     if (pilotDir) {
       console.log(`\n[3] Research-path regression vs pilot (${pilotDir})`);
       const pm = new MockBackend();

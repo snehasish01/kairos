@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin }             from "@/lib/supabase";
-import { rejectIfDemo } from "@/lib/demo/token";
+import { guardResearch } from "@/lib/study-gate";
 import { computeDebrief }            from "@/lib/debrief-summary";
 
 export async function GET(req: NextRequest) {
-  const demoBlocked = rejectIfDemo(req);
-  if (demoBlocked) return demoBlocked;
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
 
   const session_id = req.nextUrl.searchParams.get("session_id");
   if (!session_id) {

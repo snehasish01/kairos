@@ -5,6 +5,7 @@ import { shouldTrigger, type Condition } from "@/lib/trigger-engine";
 import { buildGraph, type DbNode }       from "@/lib/conviction-graph";
 import { generateDissonancePrompt }      from "@/lib/dissonance-prompt";
 import { hasDemoCookie, readDemo }      from "@/lib/demo/token";
+import { studyClosed, studyOpen }       from "@/lib/study-gate";
 import { demoTrigger }                  from "@/lib/demo/server";
 
 function demoExpired() {
@@ -31,6 +32,9 @@ export async function POST(req: NextRequest) {
 
   // A demo payload without a valid demo cookie (e.g. expired) must not reach the DB path.
   if (body && typeof body === "object" && "demo" in body) return demoExpired();
+
+  // Research path: closed unless STUDY_OPEN=true.
+  if (!studyOpen()) return studyClosed();
 
   const { session_id } = body;
   if (!session_id) {
