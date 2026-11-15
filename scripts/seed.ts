@@ -1,10 +1,13 @@
 /**
  * Seed two test sessions (one per condition) to verify schema + Supabase connection.
- * Run: npx ts-node scripts/seed.ts
+ * Run: TEST_DATABASE=true npm run seed  (refuses the live pilot project)
  * (Requires NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local)
  */
 import 'dotenv/config'
 import { createClient } from '@supabase/supabase-js'
+import { assertTestDatabase } from './lib/test-db-guard'
+
+assertTestDatabase('seed.ts')
 
 const client = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

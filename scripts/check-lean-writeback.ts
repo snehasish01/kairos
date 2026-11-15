@@ -8,8 +8,10 @@
 import { createClient } from "@supabase/supabase-js";
 import * as dotenv from "dotenv";
 import * as path   from "path";
+import { assertTestDatabase } from "./lib/test-db-guard";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
+assertTestDatabase("check-lean-writeback.ts");
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
