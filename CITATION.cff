@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: "If you use KAIROS, please cite the paper below and this software."
+title: "KAIROS: a research instrument for testing the timing of reflective prompts"
+type: software
+authors:
+  - family-names: Satpathy
+    given-names: Snehasish
+    affiliation: Indiana Wesleyan University
+    orcid: "https://orcid.org/0009-0009-4799-2020"
+license: MIT
+version: 1.0-pilot
+repository-code: "https://github.com/snehasish01/kairos"
+url: "https://osf.io/nmuk7/"
+identifiers:
+  - type: doi
+    value: 10.17605/OSF.IO/NMUK7
+    description: OSF project (preregistration, data, analysis script)
+keywords:
+  - cognitive dissonance
+  - reflective prompts
+  - intervention timing
+  - integrative complexity
+  - metacognition
+  - preregistration
+preferred-citation:
+  type: article
+  title: "KAIROS: Timing of a Reflective Prompt and the Integrative Complexity of Written Reasoning: A Preregistered Pilot Test of Anticipatory Cognitive Dissonance"
+  authors:
+    - family-names: Satpathy
+      given-names: Snehasish
+      affiliation: Indiana Wesleyan University
+      orcid: "https://orcid.org/0009-0009-4799-2020"
+  year: 2026
+  status: preprint
+  doi: 10.17605/OSF.IO/NMUK7
+  url: "https://osf.io/nmuk7/"

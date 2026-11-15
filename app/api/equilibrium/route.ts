@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin }                from "@/lib/supabase";
+import { guardResearch } from "@/lib/study-gate";
 import { computeSignals, type EventRow } from "@/lib/signal-processor";
 import type { DbNode }                   from "@/lib/conviction-graph";
 
 type NodeRow = Pick<DbNode, "id" | "edge_type" | "valence">;
 
 export async function POST(req: NextRequest) {
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
+
   let body: { session_id?: string };
   try {
     body = await req.json();

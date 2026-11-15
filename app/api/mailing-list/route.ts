@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin }             from "@/lib/supabase";
+import { guardResearch } from "@/lib/study-gate";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(req: NextRequest) {
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
+
   let body: { email?: string };
   try {
     body = await req.json();

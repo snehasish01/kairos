@@ -1,11 +1,13 @@
 import Link from "next/link";
 import ProlificCapture from "@/components/ProlificCapture";
+import DemoConsentNote from "@/components/DemoConsentNote";
 
 export default function ConsentPage() {
   return (
     <main className="flex-1 flex items-center justify-center px-4 py-16">
       <ProlificCapture />
       <div className="w-full max-w-2xl space-y-8">
+        <DemoConsentNote />
         <div className="space-y-2">
           <p className="text-xs font-mono tracking-widest text-zinc-400 uppercase">
             Research Study

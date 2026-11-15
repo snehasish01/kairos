@@ -9,8 +9,10 @@
 import { createClient } from "@supabase/supabase-js";
 import * as dotenv from "dotenv";
 import * as path   from "path";
+import { assertTestDatabase } from "./lib/test-db-guard";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
+assertTestDatabase("e2e-sim.ts");
 
 const BASE = "http://localhost:3000";
 

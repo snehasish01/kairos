@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin }                from "@/lib/supabase";
+import { guardResearch } from "@/lib/study-gate";
 
 export async function POST(req: NextRequest) {
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
+
   let body: { session_id?: string; node_id?: string | null; lean_value?: number };
   try {
     body = await req.json();

@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { guardResearch } from "@/lib/study-gate";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
+
   const { id } = await params;
 
   let body: { valence?: string; content?: string };
@@ -42,9 +46,12 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
+
   const { id } = await params;
 
   const { error } = await supabaseAdmin.from("nodes").delete().eq("id", id);

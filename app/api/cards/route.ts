@@ -2,14 +2,34 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { buildGraph, DbNode } from "@/lib/conviction-graph";
 import { generateCards } from "@/lib/card-generator";
+import { hasDemoCookie, readDemo }      from "@/lib/demo/token";
+import { studyClosed, studyOpen }       from "@/lib/study-gate";
+import { demoCards }                    from "@/lib/demo/server";
+
+function demoExpired() {
+  return NextResponse.json({ error: "Demo session expired. Start the demo again.", code: "demo_expired" }, { status: 401 });
+}
 
 export async function POST(req: NextRequest) {
-  let body: { session_id?: string };
+  // Demo mode: state comes from the request body; this branch never touches Supabase.
+  if (hasDemoCookie(req)) {
+    const claims = readDemo(req);
+    if (!claims) return demoExpired();
+    return demoCards(req, claims);
+  }
+
+  let body: { session_id?: string; demo?: unknown };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
+
+  // A demo payload without a valid demo cookie (e.g. expired) must not reach the DB path.
+  if (body && typeof body === "object" && "demo" in body) return demoExpired();
+
+  // Research path: closed unless STUDY_OPEN=true.
+  if (!studyOpen()) return studyClosed();
 
   const { session_id } = body;
   if (!session_id) {

@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -42,3 +43,14 @@ next-env.d.ts
 
 # local backups / exports — not source
 kairos.zip
+
+# Research data, IRB and study-administration files: never commit
+/docs/kairos_export*/
+/docs/kairos_export*.zip
+/docs/kairos_results*.zip
+**/KEY_DO_NOT_OPEN*
+*.csv
+/Claude outputs/
+*Approval Letter*.pdf
+KAIROS_Consent_Form*.docx
+KAIROS_Key_Reference_List*.docx

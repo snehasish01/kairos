@@ -7,9 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "ts-node --esm scripts/seed.ts",
+    "seed": "ts-node --project tsconfig.node.json scripts/seed.ts",
     "test:signals": "ts-node --project tsconfig.node.json lib/signal-processor.test.ts",
-    "test:trigger": "ts-node --project tsconfig.node.json lib/trigger-engine.test.ts"
+    "test:trigger": "ts-node --project tsconfig.node.json lib/trigger-engine.test.ts",
+    "test:demo": "ts-node --project tsconfig.node.json scripts/demo-test/run.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",

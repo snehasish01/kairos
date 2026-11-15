@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin }                from "@/lib/supabase";
+import { guardResearch } from "@/lib/study-gate";
 import { MIN_WORDS_PROMPT, MAX_WORDS_PROMPT, countWords, wordLimitError } from "@/lib/word-limits";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
+
   const { id } = await params;
 
   let body: { response?: string };

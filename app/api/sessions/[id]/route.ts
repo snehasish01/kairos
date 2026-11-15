@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { guardResearch } from "@/lib/study-gate";
 import { buildGraph } from "@/lib/conviction-graph";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
+
   const { id } = await params;
 
   const [{ data: session, error: sErr }, { data: nodes, error: nErr }] =

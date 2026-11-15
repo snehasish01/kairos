@@ -1,0 +1,299 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage[margin=1in,headheight=15pt]{geometry}
+\usepackage{titlesec,fancyhdr,booktabs,tabularx,array,enumitem,caption,microtype,amsmath}
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+\urlstyle{same}
+
+% IEEE-style headings
+\renewcommand{\thesection}{\Roman{section}}
+\renewcommand{\thesubsection}{\Alph{subsection}}
+\titleformat{\section}{\centering\normalsize\scshape}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalsize\itshape}{\thesubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{16pt}{6pt}
+\titlespacing*{\subsection}{0pt}{10pt}{4pt}
+
+\pagestyle{fancy}\fancyhf{}\renewcommand{\headrulewidth}{0pt}
+\fancyhead[R]{\footnotesize\thepage}
+\fancypagestyle{plain}{\fancyhf{}\fancyhead[R]{\footnotesize\thepage}}
+
+\captionsetup[table]{labelsep=newline,font={footnotesize,sc},justification=centering,skip=6pt}
+\renewcommand{\thetable}{\Roman{table}}
+\renewcommand{\tablename}{TABLE}
+\setlist{itemsep=2pt,topsep=4pt,leftmargin=2em}
+\setlength{\parindent}{1em}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcommand{\m}{\ensuremath{-}}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries KAIROS: Timing of a Reflective Prompt and the\\[2pt] Integrative Complexity of Written Reasoning:\\[2pt] A Preregistered Pilot Test of Anticipatory\\[2pt] Cognitive Dissonance\par}
+\vspace{14pt}
+{\large\bfseries Snehasish Satpathy\par}
+\vspace{2pt}
+{\large\itshape Indiana Wesleyan University\par}
+{\large\itshape Email: snehasish.satpathy01@gmail.com\par}
+{\large\itshape ORCID: 0009-0009-4799-2020\par}
+\end{center}
+\vspace{10pt}
+
+\begin{center}{\small\bfseries Abstract}\end{center}
+\vspace{-6pt}
+\begin{quote}\small
+Reflective prompts are widely used to counter one-sided reasoning, but little is known about when they should be delivered. The Anticipatory Cognitive Dissonance (ACD) framework predicts that a prompt delivered while a position is still forming will improve reasoning more than the same kind of prompt delivered after the position has been reached. We report a preregistered two-arm pilot test of that prediction. Thirty adults recruited through Prolific explored an everyday opinion topic in a browser-based instrument (KAIROS), reacted to evidence cards, and wrote a final rationale. A self-referential reflective prompt was scheduled either during exploration, when engagement signals indicated a forming position (anticipatory, $n = 14$), or after the participant declared a position (reactive, $n = 16$). The primary outcome was the integrative complexity of the final rationale, scored blind to condition by two raters. Contrary to the hypothesis, rationales were more integratively complex in the reactive condition ($M = 3.72$, $SD = 0.93$) than in the anticipatory condition ($M = 2.75$, $SD = 1.46$), Welch $t(21.5) = -2.13$, $p = .045$, Hedges' $g = -0.78$, 95\% CI $[-1.52, -0.04]$. The result was not robust: the Mann-Whitney test did not reach significance ($p = .066$), and neither did the analysis that removed one retained fast responder or the analysis based on the second rater alone. The anticipatory trigger delivered the prompt to only 5 of 14 participants (36\%), whereas all 16 reactive participants received it. The intent-to-treat contrast therefore largely compares receiving a prompt with not receiving one, and the comparison among prompted participants (5 vs.\ 16) was too small to be informative. We conclude that the pilot does not provide a fair test of prompt timing, and we identify the instrument changes required for a confirmatory study.
+\end{quote}
+
+\vspace{-4pt}\begin{center}{\small\bfseries Index Terms}\end{center}
+\vspace{-6pt}
+\begin{quote}\small
+\hspace{1em}cognitive dissonance, reflective prompts, intervention timing, integrative complexity, metacognition, human-AI interaction, preregistration
+\end{quote}
+\vspace{4pt}
+
+\section{Introduction}
+People who explore a question on which they already hold an opinion tend to seek and accept evidence that supports it. Systems that assist reasoning, including AI tutors and decision aids, increasingly try to interrupt this pattern with reflective prompts: brief questions that ask a person to examine their own thinking. Cognitive forcing functions reduce over-reliance on AI advice [1], and explanations framed as questions improve logical discernment relative to explanations framed as statements [2]. This literature establishes that reflective prompts can help. It says much less about when they should appear.
+
+Timing matters in theory because the psychological state a prompt meets changes over the course of reasoning. Cognitive dissonance, the discomfort produced by holding conflicting cognitions, motivates people to restore consistency [3]. In learning, comparable states of conflict and confusion can be productive when they are resolved through effortful reflection [4], [5]. Once a person has committed to a position, however, dissonance is more readily resolved by defending the commitment than by revising the reasoning behind it.
+
+The Anticipatory Cognitive Dissonance (ACD) framework [6] builds on this asymmetry. It proposes that a system should predict when a learner's position is forming but not yet settled, and introduce mild, targeted dissonance in that window. A reactive system, by contrast, intervenes only after an error or a commitment has occurred. ACD was proposed as a conceptual framework, and its central timing claim has not been tested.
+
+\subsection{The Present Study}
+KAIROS is a browser-based research instrument built to test that claim in a domain where commitment can be observed directly: forming a position on an everyday opinion topic. Participants state a prior position, react to a stream of evidence cards, and write a final rationale. A single self-referential reflective prompt is generated from the participant's own stated reasons and the evidence they avoided. The generation procedure is identical across conditions. Only the scheduled timing differs: during exploration, when engagement signals indicate a forming position (anticipatory), or immediately after the participant declares a position (reactive).
+
+The outcome is the integrative complexity of the final written rationale [7]. Integrative complexity indexes the structure of reasoning: whether a writer recognizes more than one perspective (differentiation) and whether they relate those perspectives to one another (integration). It is independent of the position taken, which makes it suitable for a study in which participants are free to keep or change their view. Complexity is known to respond to situational demands such as accountability [8], which suggests that it should also be sensitive to a well-timed prompt.
+
+This report describes a two-arm pilot of a planned four-arm design that will add random-timing and no-prompt controls. The pilot had two aims: to obtain a first estimate of the anticipatory versus reactive contrast, and to establish whether the instrument delivers the manipulation as intended.
+
+\subsection{Hypotheses}
+The hypotheses and analysis plan were preregistered before data collection (\url{https://osf.io/nmuk7}).
+\begin{itemize}
+\item \textbf{H1.} Final rationales will show higher integrative complexity in the anticipatory condition than in the reactive condition, analyzed by assigned condition (intent to treat).
+\item \textbf{H2.} The same difference will hold among participants who actually received a prompt.
+\end{itemize}
+
+\section{Method}
+\subsection{Design}
+The study used a two-arm between-subjects design with prompt timing (anticipatory vs.\ reactive) as the single factor. Participants were allocated to conditions in alternation by order of arrival at registration. Allocation was automatic, and participants were not told which condition they were in or that timing was the manipulated variable during the session. The target sample was 30 analyzable participants, fixed in advance.
+
+\subsection{Participants}
+Adults (18 or older) were recruited through Prolific on November 14, 2026 and paid US\$4.00. Forty people began the study, 20 per condition, and 34 completed a session. After exclusions (Section II-F), the analyzed sample was 30: 14 anticipatory and 16 reactive. The only demographics collected were age range and education (Table I).
+
+\begin{table}[ht]\centering\footnotesize
+\caption{Analyzed Sample ($N = 30$)}
+\begin{tabular}{lc@{\hspace{3em}}lc}
+\toprule
+Age range & $n$ & Education & $n$\\
+\midrule
+18--24 & 6 & High school diploma or GED & 4\\
+25--34 & 10 & Some college or associate degree & 3\\
+35--44 & 8 & Bachelor's degree & 17\\
+45--54 & 5 & Graduate or doctoral degree & 6\\
+65+ & 1 & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Instrument and Procedure}
+The session ran entirely in the browser and took a median of 12 minutes inside the task (range 4--29).
+\begin{enumerate}
+\item \textbf{Consent and demographics.} Participants gave informed consent and reported age range and education.
+\item \textbf{Topic and prior position.} Participants chose one of eight everyday opinion topics (for example, whether remote work is better for productivity than office work), placed themselves on a continuous scale between the two sides, and wrote a brief reason.
+\item \textbf{Exploration.} Participants saw short evidence cards in sets of three. Each set contained one card supporting the participant's lean, one undermining it, and one neutral. Cards were generated per session by a large language model (Claude Sonnet 4.6, Anthropic) conditioned on the topic and the participant's reasoning so far. The valence and type of each card were never displayed. For each card, participants could endorse it, mark it as changing their thinking, or dismiss it, and they could add points of their own. After each action they re-rated their position.
+\item \textbf{Commitment.} Participants ended exploration at any time by clicking ``I've reached my position.'' No engagement threshold was required.
+\item \textbf{Final rationale.} Participants explained in their own words where they had landed and why (50--400 words). Pasting into response fields was disabled.
+\item \textbf{Debrief.} Participants saw a summary of their own session, including where the reflective prompt fell.
+\end{enumerate}
+
+\subsection{The Reflective Prompt and Its Timing}
+Each participant was scheduled to receive one reflective prompt: a single question of at most 20 words, generated by the same model from two inputs supplied by the participant. The first was the reason they gave for their prior position. The second was a specific undermining card they had not engaged with. The question pointed at the gap between the two without asserting that the participant was wrong. The generation procedure, inputs, and response limits (25--300 words) were identical in both conditions.
+
+\textbf{Reactive condition.} The prompt appeared immediately after the participant clicked ``I've reached my position.'' The participant responded to it and then wrote the final rationale.
+
+\textbf{Anticipatory condition.} The prompt appeared during exploration, the first time the participant's engagement fell inside a predefined anticipatory window. The window was evaluated after each card action and required all of the following:
+\begin{itemize}
+\item a commitment score between 0.40 and 0.75, where commitment $= \min(1,\; 0.6\,|\mathrm{lean}| + 0.4 \times \text{recent endorsement rate})$, and the endorsement rate was computed over the last 10 logged events;
+\item a confirmation-bias score above 0.60;
+\item a ratio of engagement with disconfirming evidence below 0.30;
+\item incomplete coverage of the card types that require prediction and reflection on prediction.
+\end{itemize}
+If a participant's engagement never entered the window before they committed, no prompt was shown. A prompt shown in this condition could be left unanswered. The window definition and thresholds were fixed before data collection, and the source file is archived with the preregistration.
+
+\subsection{Outcome Measure: Integrative Complexity}
+Final rationales were scored on the 1--7 integrative complexity scale [9]. A score of 1 indicates a single perspective with no recognized alternative, 3 indicates clear differentiation of perspectives, 5 indicates explicit integration of differentiated perspectives, and 7 indicates a higher-order framework. Even scores mark transitions between these levels.
+
+After data collection closed, the 30 rationales were exported in random order under arbitrary codes, with the topic as the only accompanying information. The key linking codes to condition was stored separately and was not opened until scoring was complete. Two raters scored all 30 rationales independently from this file: the author (Rater A) and a large language model (Claude Opus 5.5, Anthropic; Rater B) that was given the scoring manual's criteria and the blinded file only. Neither rater saw the other's scores. The outcome for each rationale was the mean of the two ratings. Both raters' original scores are reported and archived unaltered.
+
+\subsection{Exclusion Criteria}
+The preregistration specified exclusion of sessions that were incomplete or showed inadequate engagement, with a session duration under five minutes as the operational criterion. Exclusions were decided before any rationale was scored. Table II gives the flow from enrollment to analysis.
+
+\begin{table}[ht]\centering\footnotesize
+\caption{Participant Flow}
+\begin{tabular}{lc}
+\toprule
+Stage & $n$\\
+\midrule
+Began the study (allocated 20 anticipatory, 20 reactive) & 40\\
+Left before completing a session & 6\\
+Completed a session & 34\\
+Excluded: minimal engagement (under three minutes in the task with almost no interaction) & 2\\
+Excluded: withdrew by returning the submission after completion & 2\\
+Analyzed (14 anticipatory, 16 reactive) & 30\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Analysis}
+All analyses followed the preregistered plan unless noted in Section V-A. H1 was tested by comparing integrative complexity between assigned conditions with a Welch $t$-test [10]. The effect size is Hedges' $g$ with a 95\% confidence interval [11], signed so that negative values indicate lower scores in the anticipatory condition. Two robustness checks accompanied the primary test: a Mann-Whitney $U$ test [12] and an ordinary least squares regression of integrative complexity on condition with HC3 heteroskedasticity-robust standard errors [13]. H2 repeated these tests among participants who received a prompt. Tests were two-sided with $\alpha = .05$. Inter-rater reliability was estimated with two-way intraclass correlations [14] and quadratic-weighted kappa. Analyses were run in Python with SciPy and statsmodels.
+
+\section{Results}
+\subsection{Delivery of the Manipulation}
+The two conditions differed sharply in whether the prompt was delivered at all. All 16 reactive participants received and answered the prompt. In the anticipatory condition the trigger fired for 5 of 14 participants (36\%), and all 5 answered. The remaining 9 anticipatory participants completed the study without seeing a prompt.
+
+Prompt delivery in the anticipatory condition tracked the strength of the participant's prior position. Prompted participants began with a stronger lean (mean $|\mathrm{lean}| = 0.82$) than unprompted participants (mean $|\mathrm{lean}| = 0.57$), consistent with the commitment component of the trigger window. Conditions were otherwise similar in time on task and rationale length (Table III).
+
+\begin{table}[ht]\centering\footnotesize
+\caption{Descriptive Statistics by Assigned Condition}
+\begin{tabular}{lcc}
+\toprule
+Measure & Anticipatory ($n = 14$) & Reactive ($n = 16$)\\
+\midrule
+Received the prompt & 5 (36\%) & 16 (100\%)\\
+Strength of prior lean, $M$ ($SD$) & 0.66 (0.26) & 0.76 (0.20)\\
+Minutes in task, median & 12.3 & 11.4\\
+Rationale length in words, $M$ ($SD$) & 85.8 (56.3) & 83.1 (76.4)\\
+Integrative complexity, $M$ ($SD$) & 2.75 (1.46) & 3.72 (0.93)\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Inter-Rater Reliability}
+The two raters ordered the rationales similarly but used different levels of the scale. Rater A's scores were higher on average ($M = 3.93$) than Rater B's ($M = 2.60$), and exact agreement was 20\%. Single-rater reliability was good for consistency, ICC(3,1) $= .79$, and moderate for absolute agreement, ICC(2,1) $= .54$; quadratic-weighted kappa was .53. Reliability of the two-rater mean, which is the outcome analyzed here, was ICC(3,$k$) $= .88$ for consistency and ICC(2,$k$) $= .70$ for absolute agreement. Because the level difference between raters applies equally to both conditions, it does not bias the between-condition contrast, and results are reported for each rater separately in Section III-E.
+
+\subsection{H1: Anticipatory Versus Reactive, by Assigned Condition}
+H1 was not supported. Integrative complexity was lower, not higher, in the anticipatory condition ($M = 2.75$, $SD = 1.46$) than in the reactive condition ($M = 3.72$, $SD = 0.93$), Welch $t(21.5) = -2.13$, $p = .045$, Hedges' $g = -0.78$, 95\% CI $[-1.52, -0.04]$. The regression with robust standard errors gave the same conclusion, $b = -0.97$, 95\% CI $[-1.89, -0.04]$, $p = .040$. The Mann-Whitney test did not reach significance, $U = 68.5$, $p = .066$.
+
+\subsection{H2: Participants Who Received a Prompt}
+H2 was not supported, and the comparison was too small to be informative. Among prompted participants, integrative complexity averaged 3.00 ($SD = 1.41$) in the anticipatory condition ($n = 5$) and 3.72 ($SD = 0.93$) in the reactive condition ($n = 16$), Welch $t(5.1) = -1.07$, $p = .33$, $g = -0.66$, 95\% CI $[-1.68, 0.37]$; Mann-Whitney $U = 27.0$, $p = .28$. The interval is compatible with a large effect in either direction.
+
+\subsection{Sensitivity Analyses}
+The direction of the H1 difference was the same in every analysis, but its statistical significance was not stable (Table IV).
+
+\begin{table}[ht]\centering\footnotesize
+\caption{Primary, Secondary, and Sensitivity Analyses}
+\setlength{\tabcolsep}{4pt}\scriptsize
+\begin{tabular}{lcccccc}
+\toprule
+ & $n$ & Anticipatory & Reactive & Welch & Hedges' $g$ & Mann-Whitney\\
+Analysis & (A / R) & $M$ ($SD$) & $M$ ($SD$) & $p$ & [95\% CI] & $p$\\
+\midrule
+H1: assigned condition & 14 / 16 & 2.75 (1.46) & 3.72 (0.93) & .045 & \m0.78 [\m1.52, \m0.04] & .066\\
+H2: prompted participants only & 5 / 16 & 3.00 (1.41) & 3.72 (0.93) & .33 & \m0.66 [\m1.68, 0.37] & .28\\
+Excluding retained fast responder & 13 / 16 & 2.88 (1.43) & 3.72 (0.93) & .085 & \m0.69 [\m1.44, 0.07] & .11\\
+Rater A only & 14 / 16 & 3.29 (1.86) & 4.50 (1.10) & .044 & \m0.79 [\m1.53, \m0.04] & .050\\
+Rater B only & 14 / 16 & 2.21 (1.12) & 2.94 (0.93) & .068 & \m0.69 [\m1.43, 0.05] & .087\\
+\bottomrule
+\multicolumn{7}{l}{\rule{0pt}{2.4ex}A = anticipatory, R = reactive. Outcome is the two-rater mean unless noted. Negative $g$: lower complexity in the anticipatory condition.}
+\end{tabular}
+\end{table}
+
+\subsection{Exploratory Analyses}
+The following analyses were not preregistered and are descriptive.
+
+\textbf{Prompt receipt.} Pooling across conditions, the 21 participants who received a prompt wrote more complex rationales ($M = 3.55$, $SD = 1.07$) than the 9 who did not ($M = 2.61$, $SD = 1.56$), Welch $t(11.4) = 1.65$, $p = .13$. Within the anticipatory condition, prompted participants averaged 3.00 and unprompted participants 2.61. Prompt receipt was not randomized, so these differences cannot be interpreted causally.
+
+\textbf{Prior lean.} Adjusting for the strength of the prior lean reduced the condition difference slightly, $b = -0.88$, 95\% CI $[-1.83, 0.06]$, $p = .067$.
+
+\textbf{Rationale length.} Integrative complexity was positively associated with rationale length (Spearman $\rho = .38$, $p = .038$), but length did not differ between conditions, and adjusting for it left the condition difference unchanged ($b = -0.98$, $p = .048$).
+
+\textbf{Topics.} Participants chose their own topic, and the distribution of topics differed somewhat between conditions. Screen time (10), AI and jobs (7), remote work (5), and social media (4) accounted for 26 of 30 sessions. City living and college appeared only in the anticipatory condition (one participant each), and home ownership only in the reactive condition (two participants). The sample is too small to model topic.
+
+\section{Discussion}
+\subsection{Summary}
+This pilot did not support the prediction that an anticipatory reflective prompt produces more integratively complex reasoning than a reactive one. The observed difference ran in the opposite direction, with a moderate-to-large point estimate and a confidence interval that spans effects from negligible to very large. Its statistical significance depended on the test, the rater, and the inclusion of a single participant. We therefore treat it as a pattern to be explained and retested, not as evidence that reactive timing is superior.
+
+\subsection{Prompt Receipt, Not Prompt Timing}
+The most plausible account of the result is that the two conditions differed in how many participants received a prompt, and only secondarily in when they received it. Every reactive participant was prompted. Almost two thirds of anticipatory participants were not. Under intent-to-treat analysis, the anticipatory group is therefore mostly an unprompted group, and the H1 contrast approximates a comparison of prompt with no prompt.
+
+Three observations are consistent with this account. First, the lowest mean complexity belonged to anticipatory participants who were never prompted (2.61), followed by prompted anticipatory participants (3.00) and reactive participants (3.72). Second, pooled across conditions, prompted participants scored about one scale point higher than unprompted participants. Third, when the comparison was restricted to prompted participants, the estimated difference between timings shrank and its interval included substantial effects in both directions. None of these observations is conclusive, because prompt receipt was determined by the participant's own behavior and not by random assignment.
+
+Read this way, the pilot offers tentative support for a more basic claim than the one it set out to test: a single self-referential question, built from a person's own stated reasons and the evidence they avoided, may raise the complexity of what they subsequently write. That claim requires the no-prompt control planned for the full design.
+
+\subsection{Remaining Differences Between the Conditions}
+Even among prompted participants, the conditions differed in more than the moment of delivery. In the reactive condition, a response to the prompt was required before the final rationale and was written immediately before it. Reflection and rationale were adjacent, and the rationale may have carried over content from the response. In the anticipatory condition, the prompt could be left unanswered, and further exploration separated it from the rationale. Recency and required elaboration are therefore confounded with timing in the present instrument, and both favor the reactive condition on a measure taken from the final text.
+
+The anticipatory trigger was also selective. It fired mainly for participants with strong prior positions, because the commitment component of the window rarely reached threshold for those with moderate leans. Prompted anticipatory participants are not a random subset of their condition, which further limits what the H2 comparison can show.
+
+\subsection{Implications for Anticipatory Systems}
+The ACD framework assumes that a system can identify the anticipatory window reliably enough to act in it. The pilot shows that this assumption carries practical weight. A conservative trigger that rarely fires forfeits whatever benefit a prompt provides, and in a short session there may be few opportunities to recover. For anticipatory tutors and decision aids, the cost of a missed intervention has to be weighed against the cost of a mistimed one. A sensible default is a fallback that guarantees delivery, for example at commitment, when the predictive trigger has not fired.
+
+\subsection{Limitations}
+\begin{itemize}
+\item \textbf{Sample size.} With 14 and 16 participants per condition, the study could detect only large effects, and its estimates are imprecise. It was designed as a pilot.
+\item \textbf{Unequal prompt delivery.} The manipulation was delivered to all participants in one condition and about a third in the other, which prevents a clean test of timing.
+\item \textbf{Allocation.} Participants were allocated in alternation by order of arrival, not by an independent random draw. Allocation was automatic and concealed from participants, but alternation is weaker than randomization. Unequal attrition after allocation produced the final 14 / 16 split.
+\item \textbf{Measurement.} The two raters differed in scale level, and absolute agreement on single ratings was moderate. One rater was a language model. Averaging improved reliability, but trained human coders remain the standard for integrative complexity.
+\item \textbf{Short texts.} Most rationales were close to the 50-word minimum (median 60 words), which compresses the range of attainable scores. No rationale received a mean score above 4.5.
+\item \textbf{Self-selected topics and generated content.} Participants chose their topics, and cards and prompts were generated per session, so no two participants saw identical materials. This supports ecological validity at the cost of experimental control.
+\item \textbf{Online sample.} Participants were crowdworkers completing an unsupervised task. Pasting into response fields was disabled, but the use of external writing aids cannot be ruled out.
+\end{itemize}
+
+\subsection{Next Steps}
+A confirmatory test of the timing hypothesis requires four changes to the instrument and design.
+\begin{enumerate}
+\item \textbf{Equalize delivery.} Recalibrate the anticipatory window so that it fires for nearly all participants, and add a fallback so that every participant in a prompted condition receives exactly one prompt. Preregister a minimum delivery rate as a manipulation check.
+\item \textbf{Equalize response demands.} Make the prompt response either required or optional in both conditions, and hold constant the interval and activity between the prompt and the final rationale.
+\item \textbf{Add the planned controls.} Include the no-prompt condition to estimate the effect of prompting itself, and the random-timing condition to separate anticipatory timing from interruption at an arbitrary moment.
+\item \textbf{Strengthen measurement and power.} Use computer-generated random allocation, at least two trained human coders with a calibration round, and a sample size set by a power analysis for the anticipatory versus reactive contrast.
+\end{enumerate}
+
+\subsection{Conclusion}
+The timing claim at the center of the Anticipatory Cognitive Dissonance framework remains untested by this pilot. What the pilot does show is that an anticipatory system is only as good as its trigger: in this instrument the trigger delivered the intervention to one participant in three, and the group it was meant to help wrote less complex rationales than the group that was always prompted. The data, materials, and analysis code are public, and the design changes above define the confirmatory study that follows.
+
+\section{Transparency Statements}
+\subsection{Deviations From the Preregistration}
+\begin{enumerate}
+\item \textbf{Scoring.} The preregistration specified scoring by a single rater with a later re-scoring of a 20\% subset. Instead, a second rater independently scored all 30 rationales, and the outcome is the mean of the two ratings. Results for each rater alone are reported in Table IV.
+\item \textbf{Five-minute criterion.} One participant spent 3.8 minutes inside the task (6.3 minutes by Prolific's timer), interacted with the evidence cards, and wrote an on-topic rationale. This participant was retained because the criterion was intended to screen out inadequate engagement. The decision was made before any rationale was scored, and Table IV reports the primary analysis without this participant.
+\item \textbf{Withdrawals.} Two participants completed a session and then returned their submissions. Their data were treated as withdrawn and excluded, and their places were refilled to reach the planned sample of 30.
+\item \textbf{Allocation.} Conditions were allocated in strict alternation by order of arrival, not by an independent random draw for each participant.
+\end{enumerate}
+
+\subsection{Data, Materials, and Code}
+The preregistration, the de-identified analysis dataset (both raters' scores, condition, prompt delivery, topic, and rationale length), the analysis script, the instrument description, and the trigger source code are available at \url{https://osf.io/nmuk7}. The script reproduces every statistic in Sections III-B to III-E from the posted dataset. Participants' written responses are not posted, in keeping with the commitment to report results only in aggregate.
+
+\subsection{Ethics}
+The study was approved by the Indiana Wesleyan University Institutional Review Board (protocol 2385, approved October 9, 2026). Dr.\ Clark Cully served as the faculty contact for the protocol. All participants gave informed consent before taking part and could withdraw at any time without penalty.
+
+\subsection{Use of AI Tools}
+Language models were part of the study by design: Claude Sonnet 4.6 generated the evidence cards and reflective prompts, and Claude Opus 5.5 served as the second rater, working only from the blinded file. Claude was also used to assist with the analysis code and with drafting this manuscript. The author reviewed all outputs and takes responsibility for the content.
+
+\subsection{Contributions and Acknowledgments}
+The author conceived the study, built the instrument, collected and scored the data, ran the analysis, and wrote the manuscript. The author thanks Dr.\ Clark Cully for serving as faculty contact for the IRB protocol.
+
+\subsection{Funding and Competing Interests}
+The study received no external funding; participant payments were covered by the author. The author declares no competing interests.
+
+\section*{\centering\normalsize\scshape References}
+\begingroup\footnotesize
+\begin{list}{[\arabic{enumi}]}{\usecounter{enumi}\setlength{\leftmargin}{2.2em}\setlength{\labelwidth}{1.8em}\setlength{\labelsep}{0.4em}\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}
+\item Z. Bu\c{c}inca, M. B. Malaya, and K. Z. Gajos, ``To trust or to think: Cognitive forcing functions can reduce overreliance on AI in AI-assisted decision-making,'' \emph{Proc. ACM Hum.-Comput. Interact.}, vol. 5, no. CSCW1, Art. 188, 2021, doi: 10.1145/3449287.
+\item V. Danry, P. Pataranutaporn, Y. Mao, and P. Maes, ``Don't just tell me, ask me: AI systems that intelligently frame explanations as questions improve human logical discernment accuracy over causal AI explanations,'' in \emph{Proc. CHI Conf. Human Factors Comput. Syst. (CHI '23)}, 2023, Art. 352.
+\item L. Festinger, \emph{A Theory of Cognitive Dissonance}. Stanford, CA, USA: Stanford Univ. Press, 1957.
+\item S. D'Mello, B. Lehman, R. Pekrun, and A. Graesser, ``Confusion can be beneficial for learning,'' \emph{Learn. Instr.}, vol. 29, pp. 153--170, 2014, doi: 10.1016/j.learninstruc.2012.05.003.
+\item G. J. Posner, K. A. Strike, P. W. Hewson, and W. A. Gertzog, ``Accommodation of a scientific conception: Toward a theory of conceptual change,'' \emph{Sci. Educ.}, vol. 66, no. 2, pp. 211--227, 1982.
+\item S. Satpathy, ``Cognitive dissonance as a trigger for intervention in anticipatory AI tutors,'' OSF, preprint, 2025. [Online]. Available: \url{https://osf.io/5symn}
+\item P. Suedfeld and P. E. Tetlock, ``Integrative complexity of communications in international crises,'' \emph{J. Conflict Resolut.}, vol. 21, no. 1, pp. 169--184, 1977.
+\item P. E. Tetlock, ``Accountability and complexity of thought,'' \emph{J. Pers. Soc. Psychol.}, vol. 45, no. 1, pp. 74--83, 1983.
+\item G. Baker-Brown, E. J. Ballard, S. Bluck, B. de Vries, P. Suedfeld, and P. E. Tetlock, ``The conceptual/integrative complexity scoring manual,'' in \emph{Motivation and Personality: Handbook of Thematic Content Analysis}, C. P. Smith, Ed. Cambridge, U.K.: Cambridge Univ. Press, 1992, pp. 401--418.
+\item B. L. Welch, ``The generalization of `Student's' problem when several different population variances are involved,'' \emph{Biometrika}, vol. 34, no. 1--2, pp. 28--35, 1947.
+\item L. V. Hedges, ``Distribution theory for Glass's estimator of effect size and related estimators,'' \emph{J. Educ. Stat.}, vol. 6, no. 2, pp. 107--128, 1981.
+\item H. B. Mann and D. R. Whitney, ``On a test of whether one of two random variables is stochastically larger than the other,'' \emph{Ann. Math. Stat.}, vol. 18, no. 1, pp. 50--60, 1947.
+\item J. G. MacKinnon and H. White, ``Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties,'' \emph{J. Econometrics}, vol. 29, no. 3, pp. 305--325, 1985.
+\item P. E. Shrout and J. L. Fleiss, ``Intraclass correlations: Uses in assessing rater reliability,'' \emph{Psychol. Bull.}, vol. 86, no. 2, pp. 420--428, 1979.
+\end{list}
+\endgroup
+\end{document}

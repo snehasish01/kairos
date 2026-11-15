@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { prolificCompletionUrl } from "@/lib/prolific";
+import { isDemoActive } from "@/lib/demo/client";
 
 interface DebriefData {
   initialLean:      number;
@@ -22,6 +23,8 @@ export default function DebriefPage() {
   const [loadErr,  setLoadErr]  = useState("");
   // Set only when /rationale saved successfully for this session and a completion code is configured.
   const [completionUrl, setCompletionUrl] = useState<string | null>(null);
+  // Demo mode: no Prolific completion link and no email opt-in.
+  const [demo, setDemo] = useState(false);
 
   const [email,       setEmail]       = useState("");
   const [emailState,  setEmailState]  = useState<"idle" | "submitting" | "done" | "error">("idle");
@@ -35,8 +38,10 @@ export default function DebriefPage() {
     const sid = sessionStorage.getItem("kairos_sid")      ?? "";
     const q   = sessionStorage.getItem("kairos_question") ?? "";
     setQuestion(q);
+    const inDemo = isDemoActive();
+    setDemo(inDemo);
     if (!sid) { setLoadErr("No active session."); return; }
-    if (sessionStorage.getItem("kairos_rationale_saved_sid") === sid) {
+    if (!inDemo && sessionStorage.getItem("kairos_rationale_saved_sid") === sid) {
       setCompletionUrl(prolificCompletionUrl());
     }
 
@@ -187,7 +192,9 @@ export default function DebriefPage() {
         <p className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Complete</p>
         <h2 className="text-lg font-semibold text-zinc-100">Thank you.</h2>
         <p className="text-sm text-zinc-400 leading-relaxed">
-          Your exploration has been recorded. You can close this window.
+          {demo
+            ? "This was a demo, so nothing was recorded. The KAIROS study is closed; the paper and preregistration are on OSF (osf.io/nmuk7)."
+            : "Your exploration has been recorded. You can close this window."}
         </p>
         {completionUrl && (
           <a
@@ -199,7 +206,8 @@ export default function DebriefPage() {
         )}
       </section>
 
-      {/* ── Email opt-in ── */}
+      {/* ── Email opt-in (never shown in the demo) ── */}
+      {!demo && (
       <section className="border border-zinc-800 rounded-lg px-5 py-5 space-y-4">
         <div className="space-y-1">
           <p className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Stay informed</p>
@@ -234,6 +242,7 @@ export default function DebriefPage() {
           <p className="text-xs text-red-400">{emailErrMsg}</p>
         )}
       </section>
+      )}
 
     </main>
   );

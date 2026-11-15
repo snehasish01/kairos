@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { guardResearch } from "@/lib/study-gate";
 import { ALREADY_PARTICIPATED_MSG } from "@/lib/prolific";
 
 // random and silent dropped for pilot — restore for full study
@@ -18,6 +19,9 @@ async function assignCondition(): Promise<Condition> {
 }
 
 export async function POST(req: NextRequest) {
+  const blocked = guardResearch(req);
+  if (blocked) return blocked;
+
   let body: {
     age_range?:           string;
     education?:           string;
