@@ -18,7 +18,7 @@ someone reasons through one of their own convictions.
 
 ## The hypothesis
 
-> Final reasoning quality, measured as the integrative complexity (IC) of the written rationale
+> Final reasoning quality, measured as the integrative complexity (IC) of the written rationale 
 > and scored offline and blind to condition, is **higher when the self-referential dissonance
 > prompt fires in the anticipatory window** than when the same prompt fires reactively.
 
