@@ -57,10 +57,10 @@ cp .env.example .env.local     # then fill in values
 npm run dev                    # http://localhost:3000
 ```
 
-Create the database schema by running `SCHEMA.sql` and then `SCHEMA_MIGRATION.sql` in the
-Supabase SQL editor. Every database access goes through server-side API routes that use the
-service-role key, so enable Row Level Security on **every** table. No anon policies are
-needed.
+Create the database schema by running `SCHEMA.sql`, `SCHEMA_MIGRATION.sql` and then
+`SCHEMA_RLS.sql` in the Supabase SQL editor. Every database access goes through server-side
+API routes that use the service-role key, so `SCHEMA_RLS.sql` enables Row Level Security on
+every table with no policies and revokes `TRUNCATE` from `anon` and `authenticated`.
 
 ### Tests
 
